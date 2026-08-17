@@ -30,6 +30,7 @@ import {
   Zap,
   Terminal
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { api } from '../services/api';
 
 export default function AdminPortal({ onClose }) {
@@ -110,10 +111,41 @@ export default function AdminPortal({ onClose }) {
   const [qrPhoneInput, setQrPhoneInput] = useState('+94 77 123 4567');
   const [dispatchedLogs, setDispatchedLogs] = useState([]);
   const [copiedPairingCode, setCopiedPairingCode] = useState(false);
+  const [qrViewMode, setQrViewMode] = useState('canvas'); // 'canvas' | 'terminal'
+  const [asciiQrText, setAsciiQrText] = useState('');
+  const qrCanvasRef = useRef(null);
 
   const fetchQrStatus = async () => {
     const res = await api.getWhatsAppSessionStatus();
-    if (res?.success && res?.data) setQrSession(res.data);
+    if (res?.success && res?.data) {
+      setQrSession(res.data);
+      if (res.data.rawQrString || res.data.qrCodeDataUrl) {
+        generateQrFormats(res.data.rawQrString || res.data.qrCodeDataUrl);
+      }
+    }
+  };
+
+  const generateQrFormats = async (qrInput) => {
+    if (!qrInput) return;
+    try {
+      // 1. Generate ASCII UTF8 Terminal Matrix
+      const ascii = await QRCode.toString(qrInput, { type: 'utf8', errorCorrectionLevel: 'M', margin: 1 });
+      setAsciiQrText(ascii);
+
+      // 2. Render Native HTML5 Canvas
+      if (qrCanvasRef.current) {
+        await QRCode.toCanvas(qrCanvasRef.current, qrInput, {
+          width: 240,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#ffffff'
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('[QR Render Error]', e);
+    }
   };
 
   const fetchDispatchLogs = async () => {
@@ -138,6 +170,7 @@ export default function AdminPortal({ onClose }) {
     setQrLoading(false);
     if (res?.success && res?.data) {
       setQrSession(res.data);
+      generateQrFormats(res.data.rawQrString || res.data.qrCodeDataUrl);
     }
   };
 
@@ -171,6 +204,12 @@ export default function AdminPortal({ onClose }) {
       if (qrTimer) clearInterval(qrTimer);
     };
   }, [token, activeTab]);
+
+  useEffect(() => {
+    if (qrSession?.qrCodeDataUrl || qrSession?.rawQrString) {
+      generateQrFormats(qrSession.rawQrString || qrSession.qrCodeDataUrl);
+    }
+  }, [qrSession, qrViewMode]);
 
   // Play audio notification ping
   const playNotificationSound = () => {
@@ -999,11 +1038,11 @@ export default function AdminPortal({ onClose }) {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-                  {/* Card 1: WhatsApp Web Live QR Scanner */}
+                  {/* Card 1: WhatsApp Web Live Advanced QR Scanner */}
                   <div style={{ background: 'var(--bg-input)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
                       <h4 style={{ fontSize: '1.05rem', margin: 0, color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
-                        <QrCode size={20} /> WhatsApp Web QR Scanner
+                        <QrCode size={20} /> Advanced WhatsApp QR Hub
                       </h4>
                       <span style={{
                         fontSize: '0.75rem',
@@ -1017,36 +1056,83 @@ export default function AdminPortal({ onClose }) {
                       </span>
                     </div>
 
+                    {/* View Mode Switcher */}
+                    {qrSession.status !== 'CONNECTED' && (
+                      <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', padding: '0.25rem', borderRadius: '8px', marginBottom: '0.85rem', border: '1px solid var(--border-light)' }}>
+                        <button
+                          type="button"
+                          onClick={() => setQrViewMode('canvas')}
+                          style={{
+                            padding: '0.3rem 0.75rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: qrViewMode === 'canvas' ? 'var(--primary-orange)' : 'transparent',
+                            color: qrViewMode === 'canvas' ? '#fff' : '#94a3b8'
+                          }}
+                        >
+                          📸 Smart HD Canvas QR
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setQrViewMode('terminal')}
+                          style={{
+                            padding: '0.3rem 0.75rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: qrViewMode === 'terminal' ? '#10b981' : 'transparent',
+                            color: qrViewMode === 'terminal' ? '#fff' : '#94a3b8'
+                          }}
+                        >
+                          📟 Terminal Matrix (ASCII)
+                        </button>
+                      </div>
+                    )}
+
                     {/* QR Code Container */}
                     <div style={{
-                      background: '#ffffff',
-                      padding: '12px',
+                      background: qrSession.status === 'CONNECTED' ? '#ffffff' : (qrViewMode === 'canvas' ? '#ffffff' : '#090d16'),
+                      padding: qrViewMode === 'terminal' && qrSession.status !== 'CONNECTED' ? '8px' : '12px',
                       borderRadius: '16px',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
                       marginBottom: '1rem',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      minWidth: '220px',
-                      minHeight: '220px',
-                      position: 'relative'
+                      minWidth: '240px',
+                      minHeight: '240px',
+                      position: 'relative',
+                      border: qrViewMode === 'terminal' && qrSession.status !== 'CONNECTED' ? '1px solid #10b981' : 'none'
                     }}>
                       {qrSession.status === 'CONNECTED' ? (
                         <div style={{ color: '#059669', padding: '1.5rem', textAlign: 'center' }}>
                           <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto 0.75rem auto' }} />
                           <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#065f46' }}>Connected!</div>
-                          <div style={{ fontSize: '0.8rem', color: '#047857', marginTop: '0.25rem' }}>{qrSession.connectedPhone || '+94720346443'}</div>
+                          <div style={{ fontSize: '0.82rem', color: '#047857', marginTop: '0.25rem', fontWeight: 700 }}>{qrSession.connectedPhone || '+94 72 034 6443'}</div>
                         </div>
-                      ) : qrSession.qrCodeDataUrl ? (
-                        <img
-                          src={qrSession.qrCodeDataUrl}
-                          alt="WhatsApp QR Code"
-                          style={{ width: '200px', height: '200px', display: 'block', borderRadius: '8px' }}
-                        />
+                      ) : qrViewMode === 'canvas' ? (
+                        <div style={{ position: 'relative' }}>
+                          <canvas ref={qrCanvasRef} width={240} height={240} style={{ display: 'block', borderRadius: '8px' }} />
+                        </div>
                       ) : (
-                        <div style={{ color: '#64748b', padding: '1.5rem', textAlign: 'center' }}>
-                          <QrCode size={56} color="#94a3b8" style={{ margin: '0 auto 0.75rem auto', opacity: 0.6 }} />
-                          <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>QR Code සූදානම් කරමින්...</div>
+                        <div style={{ textAlign: 'left', maxWidth: '300px', overflow: 'hidden' }}>
+                          <pre style={{
+                            margin: 0,
+                            fontSize: '6.2px',
+                            lineHeight: '6.2px',
+                            fontFamily: 'Consolas, monospace',
+                            color: '#34d399',
+                            background: '#090d16',
+                            padding: '4px',
+                            userSelect: 'all'
+                          }}>
+                            {asciiQrText || 'Generating Terminal Matrix...'}
+                          </pre>
                         </div>
                       )}
                     </div>
@@ -1069,7 +1155,7 @@ export default function AdminPortal({ onClose }) {
                           disabled={qrLoading}
                           style={{ flex: 1, fontWeight: 700 }}
                         >
-                          <RefreshCw size={14} className={qrLoading ? 'spin' : ''} /> {qrLoading ? 'Generating...' : '🔄 Refresh QR'}
+                          <RefreshCw size={14} className={qrLoading ? 'spin' : ''} /> {qrLoading ? 'Generating...' : '🔄 Refresh QR Code'}
                         </button>
                       )}
                     </div>
