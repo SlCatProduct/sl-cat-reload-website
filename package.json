@@ -8,7 +8,8 @@
     "build": "cd frontend && npm install && npm run build",
     "start": "node backend/server.js",
     "dev:backend": "cd backend && npm start",
-    "dev:frontend": "cd frontend && npm run dev",
+    "bot": "node backend/whatsapp-bot.js",
+    "whatsapp:bot": "node backend/whatsapp-bot.js",
     "link-whatsapp": "cd backend && node link-whatsapp.js",
     "test:calc": "node backend/test-calc.js"
   },
