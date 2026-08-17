@@ -1044,27 +1044,32 @@ export default function AdminPortal({ onClose }) {
                   </div>
 
                   {/* Card 2: 24/7 Baileys Native Socket Engine Guide */}
-                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-highlight)', borderRadius: '16px', padding: '1.35rem' }}>
-                    <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem', color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Terminal size={18} color="#38bdf8" /> 2. Local/VPS 24/7 Baileys Socket Engine
-                    </h4>
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '16px', padding: '1.35rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                      <h4 style={{ fontSize: '1rem', margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
+                        <Terminal size={18} /> 2. 24/7 Baileys Native Socket Bot
+                      </h4>
+                      <span style={{ fontSize: '0.72rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700 }}>
+                        🟢 LIVE RUNNING
+                      </span>
+                    </div>
 
                     <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '0.85rem' }}>
-                      ඔබගේ පරිගණකයේ හෝ VPS එකක WhatsApp Multi-Device Socket එක 24/7 ක්‍රියාත්මක කර තැබීමට:
+                      @whiskeysockets/baileys Socket Engine එක මගින් WhatsApp Group එකට සෘජුවම Auto-Orders යැවීමට:
                     </p>
 
                     <div style={{ background: '#090d16', padding: '0.75rem', borderRadius: '8px', border: '1px solid #1e293b', marginBottom: '0.85rem' }}>
                       <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Terminal / Command Prompt:</div>
-                      <code style={{ fontSize: '0.85rem', color: '#38bdf8', fontFamily: 'monospace' }}>
-                        npm run link-whatsapp
+                      <code style={{ fontSize: '0.9rem', color: '#38bdf8', fontFamily: 'monospace', fontWeight: 800 }}>
+                        npm run bot
                       </code>
                     </div>
 
-                    <ol style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.6', paddingLeft: '1.2rem', margin: 0 }}>
-                      <li>ඉහත command එක Terminal එකේ run කර දුරකථන අංකය ලබාදෙන්න.</li>
-                      <li>ලැබෙන Official Code එක WhatsApp ➔ Linked Devices ➔ Link with phone number මගින් ඇතුළත් කරන්න.</li>
-                      <li>පසුබිමින් (Background) සියලුම Orders Group එකට ස්වයංක්‍රීයව Dispatch වේ!</li>
-                    </ol>
+                    <div style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.7', background: 'rgba(56,189,248,0.06)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(56,189,248,0.15)' }}>
+                      <div>✅ <strong>Connected WhatsApp:</strong> +94 72 034 6443</div>
+                      <div>🎯 <strong>Target Group:</strong> 120363410663305077@g.us</div>
+                      <div style={{ color: '#34d399', marginTop: '0.25rem' }}>⚡ පාරිභෝගිකයින් දමන සෑම Order එකක්ම ස්වයංක්‍රීයව Group එකට යැවේ!</div>
+                    </div>
                   </div>
                 </div>
 
