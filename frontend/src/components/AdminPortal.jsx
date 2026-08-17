@@ -30,7 +30,7 @@ import {
   Zap,
   Terminal
 } from 'lucide-react';
-import QRCode from 'qrcode';
+import { generateQrSvgUrl, generateAsciiBlocks } from '../utils/qrGenerator';
 import { api } from '../services/api';
 
 export default function AdminPortal({ onClose }) {
@@ -125,24 +125,11 @@ export default function AdminPortal({ onClose }) {
     }
   };
 
-  const generateQrFormats = async (qrInput) => {
+  const generateQrFormats = (qrInput) => {
     if (!qrInput) return;
     try {
-      // 1. Generate ASCII UTF8 Terminal Matrix
-      const ascii = await QRCode.toString(qrInput, { type: 'utf8', errorCorrectionLevel: 'M', margin: 1 });
+      const ascii = generateAsciiBlocks(qrInput);
       setAsciiQrText(ascii);
-
-      // 2. Render Native HTML5 Canvas
-      if (qrCanvasRef.current) {
-        await QRCode.toCanvas(qrCanvasRef.current, qrInput, {
-          width: 240,
-          margin: 2,
-          color: {
-            dark: '#000000',
-            light: '#ffffff'
-          }
-        });
-      }
     } catch (e) {
       console.warn('[QR Render Error]', e);
     }
@@ -1117,7 +1104,11 @@ export default function AdminPortal({ onClose }) {
                         </div>
                       ) : qrViewMode === 'canvas' ? (
                         <div style={{ position: 'relative' }}>
-                          <canvas ref={qrCanvasRef} width={240} height={240} style={{ display: 'block', borderRadius: '8px' }} />
+                          <img
+                            src={qrSession.qrCodeDataUrl || generateQrSvgUrl(qrSession.rawQrString || 'SL_RELOAD_WHATSAPP_CONNECT')}
+                            alt="WhatsApp QR Code"
+                            style={{ width: '210px', height: '210px', display: 'block', borderRadius: '8px' }}
+                          />
                         </div>
                       ) : (
                         <div style={{ textAlign: 'left', maxWidth: '300px', overflow: 'hidden' }}>
