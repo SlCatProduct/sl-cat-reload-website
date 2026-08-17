@@ -118,6 +118,11 @@ export const api = {
     body: JSON.stringify({ phone })
   }),
 
+  generateWhatsAppPairingCode: (phone = '') => request('/admin/whatsapp/generate-pairing-code', {
+    method: 'POST',
+    body: JSON.stringify({ phone })
+  }),
+
   confirmWhatsAppPairing: (phone = '') => request('/admin/whatsapp/confirm-pairing', {
     method: 'POST',
     body: JSON.stringify({ phone })

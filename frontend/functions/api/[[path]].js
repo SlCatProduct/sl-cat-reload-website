@@ -365,6 +365,35 @@ export async function onRequest(context) {
       return jsonResponse({ success: true, data: inMemoryStore.whatsappSession });
     }
 
+    if (path === '/api/admin/whatsapp/generate-pairing-code' && method === 'POST') {
+      const body = await request.json();
+      const phoneInput = (body.phone || '+94720346443').replace(/\D/g, '');
+      const cleanPhone = phoneInput.startsWith('0') ? '94' + phoneInput.substring(1) : (phoneInput.startsWith('94') ? phoneInput : '94' + phoneInput);
+
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let pCode = '';
+      for (let i = 0; i < 8; i++) {
+        pCode += chars.charAt(Math.floor(Math.random() * chars.length));
+        if (i === 3) pCode += '-';
+      }
+
+      inMemoryStore.whatsappSession = {
+        status: 'PAIRING',
+        pairingCode: pCode,
+        qrCodeDataUrl: null,
+        connectedPhone: `+${cleanPhone}`,
+        targetGroupId: inMemoryStore.settings?.whatsappGroupId || '120363410663305077@g.us',
+        autoDispatch: true,
+        lastPing: new Date().toISOString()
+      };
+
+      return jsonResponse({
+        success: true,
+        message: 'Pairing Code generated successfully!',
+        data: inMemoryStore.whatsappSession
+      });
+    }
+
     if (path === '/api/admin/whatsapp/generate-qr' && method === 'POST') {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let pCode = '';

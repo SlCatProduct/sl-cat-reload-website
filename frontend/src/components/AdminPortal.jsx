@@ -119,6 +119,17 @@ export default function AdminPortal({ onClose }) {
     if (res?.success && res?.data) setDispatchedLogs(res.data);
   };
 
+  const [pairingLoading, setPairingLoading] = useState(false);
+
+  const handleGeneratePairingCode = async () => {
+    setPairingLoading(true);
+    const res = await api.generateWhatsAppPairingCode(qrPhoneInput || '+94720346443');
+    setPairingLoading(false);
+    if (res?.success && res?.data) {
+      setQrSession(res.data);
+    }
+  };
+
   const handleGenerateQR = async () => {
     setQrLoading(true);
     const res = await api.generateWhatsAppQR(qrPhoneInput);
@@ -982,59 +993,103 @@ export default function AdminPortal({ onClose }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
-                  {/* Left Column: Genuine Baileys QR Code */}
-                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-highlight)', borderRadius: '16px', padding: '1.35rem', textAlign: 'center' }}>
-                    <h4 style={{ fontSize: '0.95rem', marginBottom: '0.5rem', color: '#f1f5f9' }}>
-                      1. Genuine WhatsApp Multi-Device QR Code
-                    </h4>
-                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '1rem' }}>
-                      @whiskeysockets/baileys native WebSocket engine
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                  {/* Column 1: ⭐ 8-Digit Pairing Code Option (100% Recommended - No QR Scan Needed!) */}
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '16px', padding: '1.35rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                      <h4 style={{ fontSize: '1rem', margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
+                        <Smartphone size={18} /> 1. 8-Digit Pairing Code (QR නැතිව සම්බන්ධ කිරීම)
+                      </h4>
+                      <span style={{ fontSize: '0.72rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700 }}>
+                        ⭐ RECOMMENDED
+                      </span>
                     </div>
 
-                    {qrSession.qrCodeDataUrl ? (
-                      <div style={{ margin: '0 auto 1.25rem auto', display: 'inline-block', padding: '0.85rem', background: '#ffffff', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}>
-                        <img 
-                          src={qrSession.qrCodeDataUrl} 
-                          alt="Genuine Baileys WhatsApp QR Code" 
-                          style={{ width: '230px', height: '230px', display: 'block', borderRadius: '8px' }} 
-                        />
+                    <p style={{ fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '1rem' }}>
+                      QR Scan නොකර දුරකථන අංකය හරහා WhatsApp එක පහසුවෙන්ම Link කරගන්න.
+                    </p>
+
+                    {/* Phone Number Input */}
+                    <div className="form-group" style={{ marginBottom: '1rem' }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>ඔබගේ WhatsApp දුරකථන අංකය (Phone Number)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="+94 72 034 6443"
+                        value={qrPhoneInput}
+                        onChange={(e) => setQrPhoneInput(e.target.value)}
+                        style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.5px' }}
+                      />
+                    </div>
+
+                    {/* Generated Pairing Code Display Box */}
+                    {qrSession.pairingCode ? (
+                      <div style={{
+                        background: 'rgba(56, 189, 248, 0.08)',
+                        border: '2px dashed #38bdf8',
+                        borderRadius: '12px',
+                        padding: '1.25rem',
+                        textAlign: 'center',
+                        marginBottom: '1rem'
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                          ඔබගේ WhatsApp Pairing Code එක:
+                        </div>
+                        <div style={{
+                          fontSize: '2rem',
+                          fontWeight: 900,
+                          color: '#38bdf8',
+                          letterSpacing: '4px',
+                          fontFamily: 'monospace',
+                          margin: '0.4rem 0'
+                        }}>
+                          {qrSession.pairingCode}
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(qrSession.pairingCode.replace('-', ''));
+                            setCopiedPairingCode(true);
+                            setTimeout(() => setCopiedPairingCode(false), 2500);
+                          }}
+                          style={{ marginTop: '0.4rem', gap: '0.3rem' }}
+                        >
+                          <Copy size={13} /> {copiedPairingCode ? '✓ Copied!' : 'Code එක Copy කරගන්න'}
+                        </button>
                       </div>
                     ) : qrSession.status === 'CONNECTED' ? (
-                      <div style={{ padding: '2.5rem 1rem', background: 'rgba(16,185,129,0.06)', borderRadius: '12px', border: '1px dashed rgba(16,185,129,0.3)', marginBottom: '1.25rem' }}>
-                        <CheckCircle size={48} color="#10b981" style={{ margin: '0 auto 0.75rem auto' }} />
-                        <div style={{ fontWeight: 800, color: '#34d399', fontSize: '1.15rem' }}>Baileys WhatsApp Socket Live!</div>
-                        <div style={{ fontSize: '0.88rem', color: '#fff', marginTop: '0.4rem' }}>
+                      <div style={{ padding: '1.5rem', background: 'rgba(16,185,129,0.08)', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.3)', marginBottom: '1rem', textAlign: 'center' }}>
+                        <CheckCircle size={36} color="#10b981" style={{ margin: '0 auto 0.5rem auto' }} />
+                        <div style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>WhatsApp Web Socket Live & Connected!</div>
+                        <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '0.25rem' }}>
                           Connected Phone: <strong>{qrSession.connectedPhone}</strong>
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#ff7900', marginTop: '0.3rem' }}>
-                          Target Group: <strong>{qrSession.targetGroupId}</strong>
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.5rem' }}>
-                          ⚡ All incoming customer orders will auto-send to this group instantly!
-                        </div>
                       </div>
-                    ) : (
-                      <div style={{ padding: '2.5rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px dashed var(--border-hairline)', marginBottom: '1.25rem' }}>
-                        <QrCode size={48} color="#94a3b8" style={{ margin: '0 auto 0.75rem auto' }} />
-                        <div style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>Baileys Socket Active නැත</div>
-                        <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                          පහත බොත්තම ඔබා Genuine WhatsApp QR Code එක සාදාගන්න
-                        </div>
-                      </div>
-                    )}
+                    ) : null}
 
-                    {/* QR Action Buttons */}
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm"
-                        style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 800, padding: '0.55rem 1.1rem' }}
-                        onClick={handleGenerateQR}
-                        disabled={qrLoading}
+                        className="btn btn-primary"
+                        style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 800, padding: '0.7rem' }}
+                        onClick={handleGeneratePairingCode}
+                        disabled={pairingLoading}
                       >
-                        <QrCode size={15} /> {qrLoading ? 'Baileys Socket ආරම්භ කරමින්...' : '⚡ Generate Genuine WhatsApp QR Code'}
+                        <Smartphone size={16} /> {pairingLoading ? 'Pairing Code සාදමින්...' : '🔑 8-Digit Pairing Code එක සාදාගන්න'}
                       </button>
+
+                      {qrSession.status === 'PAIRING' && (
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          style={{ background: 'rgba(16,185,129,0.2)', color: '#34d399', borderColor: '#10b981', fontWeight: 800 }}
+                          onClick={() => handleConfirmPairing()}
+                        >
+                          <Check size={14} /> ✅ මම Code එක ඇතුළත් කළා (Confirm Connected)
+                        </button>
+                      )}
 
                       {qrSession.status === 'CONNECTED' && (
                         <button
@@ -1043,24 +1098,24 @@ export default function AdminPortal({ onClose }) {
                           style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}
                           onClick={handleDisconnectSession}
                         >
-                          <X size={14} /> Disconnect & Reset
+                          <X size={14} /> Disconnect Session
                         </button>
                       )}
                     </div>
                   </div>
 
-                  {/* Right Column: Instructions, Webhook Setup & Test */}
+                  {/* Column 2: Instructions & Alternative QR Option */}
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-highlight)', borderRadius: '16px', padding: '1.35rem' }}>
-                    <h4 style={{ fontSize: '0.95rem', marginBottom: '0.85rem', color: '#f1f5f9' }}>
-                      2. Baileys මගින් සම්බන්ධ කරගන්නා ආකාරය
+                    <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem', color: '#f1f5f9' }}>
+                      2. Pairing Code එක ඇතුළත් කරන ආකාරය (Step-by-Step):
                     </h4>
 
-                    <ol style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.75', paddingLeft: '1.2rem', marginBottom: '1.25rem' }}>
-                      <li>වම්පස ඇති <strong>"Generate Genuine WhatsApp QR Code"</strong> ඔබන්න.</li>
+                    <ol style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.8', paddingLeft: '1.2rem', marginBottom: '1.25rem' }}>
                       <li>ඔබගේ දුරකථනයේ <strong>WhatsApp</strong> විවෘත කරන්න.</li>
-                      <li><strong>Settings (හෝ ⋮ තිත් 3) ➔ Linked Devices ➔ Link a Device</strong> ඔබන්න.</li>
-                      <li>වම්පස දිස්වන <strong>Genuine Baileys QR Code</strong> එක ඔබගේ දුරකථනයෙන් Scan කරන්න.</li>
-                      <li>ස්වයංක්‍රීයවම <strong>🟢 CONNECTED</strong> බවට පත්වන අතර, කිසිවක් ඔබන්නේ නැතිව සෑම Order එකක්ම Group එකට Auto-Send වේ!</li>
+                      <li><strong>Settings (හෝ ⋮ තිත් 3) ➔ Linked Devices</strong> වෙත යන්න.</li>
+                      <li><strong>"Link with phone number instead" (දුරකථන අංකය මගින් සම්බන්ධ කරන්න)</strong> ඔබන්න.</li>
+                      <li>වම්පස ලැබුණු **8-Digit Pairing Code** එක ඔබගේ Phone එකෙහි Type කරන්න!</li>
+                      <li>තත්පර 3කින් ස්වයංක්‍රීයව <strong>🟢 CONNECTED</strong> බවට පත්වී Orders සියල්ල Group එකට Auto-Send වේ!</li>
                     </ol>
 
                     <div style={{ background: 'rgba(16,185,129,0.08)', padding: '0.85rem', borderRadius: '10px', border: '1px solid rgba(16,185,129,0.2)', marginBottom: '1.25rem', fontSize: '0.82rem' }}>
