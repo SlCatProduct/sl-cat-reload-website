@@ -17,6 +17,9 @@ let inMemoryStore = {
     noticeBanner: '🎉 දැවැන්ත වට්ටම්: Dialog රිලෝඩ් වලට 40%ක්, Hutch / EzCash / CEB බිල්පත් (5000+) සඳහා 10%ක වට්ටමක්!',
     whatsappGroupId: '120363410663305077@g.us'
   },
+  admins: [
+    { id: 'admin-1', username: 'admin', password: 'admin123', name: 'Main Administrator', role: 'SUPER_ADMIN', createdAt: new Date().toISOString() }
+  ],
   packages: [
     { id: 'pkg-dlg-1', serviceType: 'DIALOG', name: 'Dialog Quick Starter', category: 'Dialog Reload', amount: 100, description: 'Prepaid instant call & SMS reload', popular: false, badge: '15% OFF', active: true },
     { id: 'pkg-dlg-2', serviceType: 'DIALOG', name: 'Dialog Standard Max', category: 'Dialog Reload', amount: 1000, description: '🌟 Standard tier උපරිම පැකේජය (Pay Rs. 850)', popular: true, badge: '15% OFF', active: true },
@@ -212,14 +215,87 @@ export async function onRequest(context) {
     // 7. Admin Login
     if (path === '/api/admin/login' && method === 'POST') {
       const body = await request.json();
-      if (body.username === 'admin' && body.password === 'admin123') {
+      const inputUser = (body.username || '').trim().toLowerCase();
+      const inputPass = (body.password || '').trim();
+
+      const matchedAdmin = (inMemoryStore.admins || []).find(
+        a => (a.username || '').toLowerCase() === inputUser && a.password === inputPass
+      ) || (inputUser === 'admin' && inputPass === 'admin123' ? { id: 'admin-1', username: 'admin', name: 'Main Administrator', role: 'SUPER_ADMIN' } : null);
+
+      if (matchedAdmin) {
+        const edgeToken = 'cf_edge_token_' + Date.now();
         return jsonResponse({
           success: true,
-          token: 'cf_edge_token_' + Date.now(),
-          user: { username: 'admin', role: 'admin' }
+          token: edgeToken,
+          data: {
+            token: edgeToken,
+            admin: { id: matchedAdmin.id, username: matchedAdmin.username, name: matchedAdmin.name || matchedAdmin.username, role: matchedAdmin.role || 'admin' }
+          }
         });
       }
-      return jsonResponse({ success: false, message: 'පරිශීලක නාමය හෝ මුරපදය වැරදියි' }, 401);
+      return jsonResponse({ success: false, message: 'පරිශීලක නාමය හෝ මුරපදය වැරදියි (Invalid username or password)' }, 401);
+    }
+
+    // 7.1 Admin Me
+    if (path === '/api/admin/me' && method === 'GET') {
+      return jsonResponse({
+        success: true,
+        data: { id: 'admin-1', username: 'admin', role: 'SUPER_ADMIN' }
+      });
+    }
+
+    // 7.2 Admin Users List & Management
+    if (path === '/api/admin/users') {
+      if (method === 'GET') {
+        const list = (inMemoryStore.admins || []).map(a => ({
+          id: a.id,
+          username: a.username,
+          name: a.name || a.username,
+          role: a.role || 'ADMIN',
+          createdAt: a.createdAt || new Date().toISOString()
+        }));
+        return jsonResponse({ success: true, data: list });
+      }
+      if (method === 'POST') {
+        const body = await request.json();
+        if (!body.username || !body.password) {
+          return jsonResponse({ success: false, message: 'Username and password are required' }, 400);
+        }
+        if (inMemoryStore.admins.some(a => a.username.toLowerCase() === body.username.toLowerCase())) {
+          return jsonResponse({ success: false, message: 'මෙම Username එක දැනටමත් පවතී (Username already exists)' }, 400);
+        }
+        const newAdmin = {
+          id: `adm_${Date.now()}`,
+          username: body.username,
+          password: body.password,
+          name: body.name || body.username,
+          role: body.role || 'ADMIN',
+          createdAt: new Date().toISOString()
+        };
+        inMemoryStore.admins.push(newAdmin);
+        return jsonResponse({ success: true, message: 'නව පරිපාලක සාර්ථකව එක් කරන ලදී!', data: newAdmin }, 201);
+      }
+    }
+
+    // Delete Admin User
+    if (path.startsWith('/api/admin/users/') && method === 'DELETE') {
+      const adminId = path.replace('/api/admin/users/', '');
+      if (adminId === 'admin-1' || inMemoryStore.admins.length <= 1) {
+        return jsonResponse({ success: false, message: 'ප්‍රධාන පරිපාලක ගිණුම (Super Admin) මකා දැමිය නොහැක.' }, 400);
+      }
+      inMemoryStore.admins = inMemoryStore.admins.filter(a => a.id !== adminId);
+      return jsonResponse({ success: true, message: 'පරිපාලක ගිණුම ඉවත් කරන ලදී.' });
+    }
+
+    // Change Password
+    if (path === '/api/admin/users/change-password' && method === 'POST') {
+      const body = await request.json();
+      const adminObj = inMemoryStore.admins.find(a => a.username === (body.username || 'admin'));
+      if (adminObj) {
+        adminObj.password = body.newPassword;
+        return jsonResponse({ success: true, message: 'මුරපදය සාර්ථකව වෙනස් කරන ලදී!' });
+      }
+      return jsonResponse({ success: false, message: 'පරිපාලක ගිණුම හමු නොවීය.' }, 404);
     }
 
     // 8. Admin Orders & Stats
