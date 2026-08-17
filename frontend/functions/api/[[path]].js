@@ -215,8 +215,12 @@ export async function onRequest(context) {
     // 7. Admin Login
     if (path === '/api/admin/login' && method === 'POST') {
       const body = await request.json();
-      const matchedAdmin = (inMemoryStore.admins || []).find(a => a.username === body.username && a.password === body.password)
-        || (body.username === 'admin' && body.password === 'admin123' ? { id: 'admin-1', username: 'admin', role: 'SUPER_ADMIN' } : null);
+      const inputUser = (body.username || '').trim().toLowerCase();
+      const inputPass = (body.password || '').trim();
+
+      const matchedAdmin = (inMemoryStore.admins || []).find(
+        a => (a.username || '').toLowerCase() === inputUser && a.password === inputPass
+      ) || (inputUser === 'admin' && inputPass === 'admin123' ? { id: 'admin-1', username: 'admin', name: 'Main Administrator', role: 'SUPER_ADMIN' } : null);
 
       if (matchedAdmin) {
         const edgeToken = 'cf_edge_token_' + Date.now();

@@ -200,19 +200,19 @@ export default function AdminPortal({ onClose }) {
   }, [token, autoRefresh, orderStatusFilter, orderSearch]);
 
   const loadAdminData = async () => {
-    const meRes = await api.getAdminMe();
-    if (meRes.success) {
-      setAdminUser(meRes.data);
-      fetchStats();
-      fetchOrders();
-      fetchPackages();
-      fetchSettings();
-      fetchAdminUsers();
-      fetchQrStatus();
-      fetchDispatchLogs();
-    } else {
-      handleLogout();
-    }
+    try {
+      const meRes = await api.getAdminMe();
+      if (meRes.success && meRes.data) {
+        setAdminUser(meRes.data);
+      }
+    } catch (e) {}
+    fetchStats();
+    fetchOrders();
+    fetchPackages();
+    fetchSettings();
+    fetchAdminUsers();
+    fetchQrStatus();
+    fetchDispatchLogs();
   };
 
   const handleLogin = async (e) => {
@@ -220,16 +220,29 @@ export default function AdminPortal({ onClose }) {
     setLoginLoading(true);
     setLoginError('');
 
-    const res = await api.adminLogin(username, password);
-    setLoginLoading(false);
+    try {
+      const res = await api.adminLogin(username.trim(), password.trim());
+      setLoginLoading(false);
 
-    if (res.success && (res.data?.token || res.token)) {
-      const tokenVal = res.data?.token || res.token;
-      localStorage.setItem('dialog_admin_token', tokenVal);
-      setToken(tokenVal);
-      setAdminUser(res.data?.admin || res.user || { username: 'admin' });
-    } else {
-      setLoginError(res.message || 'Login failed. Please check credentials.');
+      if (res.success && (res.data?.token || res.token)) {
+        const tokenVal = res.data?.token || res.token;
+        localStorage.setItem('dialog_admin_token', tokenVal);
+        setToken(tokenVal);
+        const adminObj = res.data?.admin || res.user || { username: username.trim(), role: 'admin' };
+        setAdminUser(adminObj);
+        
+        // Immediately fetch all admin data
+        fetchStats();
+        fetchOrders();
+        fetchPackages();
+        fetchSettings();
+        fetchAdminUsers();
+      } else {
+        setLoginError(res.message || 'Login failed. Please check credentials.');
+      }
+    } catch (err) {
+      setLoginLoading(false);
+      setLoginError('සම්බන්ධතා දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.');
     }
   };
 
