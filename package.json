@@ -9,6 +9,7 @@
     "start": "node backend/server.js",
     "dev:backend": "cd backend && npm start",
     "dev:frontend": "cd frontend && npm run dev",
+    "link-whatsapp": "cd backend && node link-whatsapp.js",
     "test:calc": "node backend/test-calc.js"
   },
   "dependencies": {}
