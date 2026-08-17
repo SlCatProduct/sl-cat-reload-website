@@ -3,10 +3,10 @@
  * 100% Compatible with Vite, Cloudflare Pages, and all modern browsers without external packages.
  */
 
-// Simple lightweight QR matrix generator using QR server / SVG vector fallback
-export function generateQrSvgUrl(text, size = 260) {
+// High-resolution crisp vector QR code generator
+export function generateQrSvgUrl(text, size = 320) {
   if (!text) return '';
-  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=10&data=${encodeURIComponent(text)}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=15&color=000000&bgcolor=ffffff&data=${encodeURIComponent(text)}`;
 }
 
 /**

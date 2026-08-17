@@ -1083,46 +1083,45 @@ export default function AdminPortal({ onClose }) {
 
                     {/* QR Code Container */}
                     <div style={{
-                      background: qrSession.status === 'CONNECTED' ? '#ffffff' : (qrViewMode === 'canvas' ? '#ffffff' : '#090d16'),
-                      padding: qrViewMode === 'terminal' && qrSession.status !== 'CONNECTED' ? '8px' : '12px',
-                      borderRadius: '16px',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
-                      marginBottom: '1rem',
+                      background: '#ffffff',
+                      padding: '16px',
+                      borderRadius: '20px',
+                      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                      marginBottom: '1.25rem',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      minWidth: '240px',
-                      minHeight: '240px',
-                      position: 'relative',
-                      border: qrViewMode === 'terminal' && qrSession.status !== 'CONNECTED' ? '1px solid #10b981' : 'none'
+                      minWidth: '300px',
+                      minHeight: '300px',
+                      position: 'relative'
                     }}>
                       {qrSession.status === 'CONNECTED' ? (
-                        <div style={{ color: '#059669', padding: '1.5rem', textAlign: 'center' }}>
-                          <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto 0.75rem auto' }} />
-                          <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#065f46' }}>Connected!</div>
-                          <div style={{ fontSize: '0.82rem', color: '#047857', marginTop: '0.25rem', fontWeight: 700 }}>{qrSession.connectedPhone || '+94 72 034 6443'}</div>
+                        <div style={{ color: '#059669', padding: '2rem', textAlign: 'center' }}>
+                          <CheckCircle size={72} color="#10b981" style={{ margin: '0 auto 0.75rem auto' }} />
+                          <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#065f46' }}>Connected!</div>
+                          <div style={{ fontSize: '0.9rem', color: '#047857', marginTop: '0.35rem', fontWeight: 700 }}>{qrSession.connectedPhone || '+94 72 034 6443'}</div>
                         </div>
                       ) : qrViewMode === 'canvas' ? (
                         <div style={{ position: 'relative' }}>
                           <img
                             src={qrSession.qrCodeDataUrl || generateQrSvgUrl(qrSession.rawQrString || 'SL_RELOAD_WHATSAPP_CONNECT')}
                             alt="WhatsApp QR Code"
-                            style={{ width: '210px', height: '210px', display: 'block', borderRadius: '8px' }}
+                            style={{ width: '270px', height: '270px', display: 'block', borderRadius: '10px' }}
                           />
                         </div>
                       ) : (
-                        <div style={{ textAlign: 'left', maxWidth: '300px', overflow: 'hidden' }}>
+                        <div style={{ textAlign: 'center', background: '#ffffff', padding: '8px', borderRadius: '10px' }}>
                           <pre style={{
                             margin: 0,
-                            fontSize: '6.2px',
-                            lineHeight: '6.2px',
+                            fontSize: '7.6px',
+                            lineHeight: '7.6px',
                             fontFamily: 'Consolas, monospace',
-                            color: '#34d399',
-                            background: '#090d16',
-                            padding: '4px',
+                            color: '#000000',
+                            background: '#ffffff',
+                            fontWeight: 'bold',
                             userSelect: 'all'
                           }}>
-                            {asciiQrText || 'Generating Terminal Matrix...'}
+                            {asciiQrText || 'Generating High Contrast Matrix...'}
                           </pre>
                         </div>
                       )}
