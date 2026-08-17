@@ -86,6 +86,16 @@ export default function AdminPortal({ onClose }) {
   });
   const [settingsSaveMsg, setSettingsSaveMsg] = useState('');
 
+  // Admin User Management State
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [newAdminUsername, setNewAdminUsername] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [newAdminName, setNewAdminName] = useState('');
+  const [adminUserMsg, setAdminUserMsg] = useState('');
+  const [newAdminLoading, setNewAdminLoading] = useState(false);
+  const [changePwdVal, setChangePwdVal] = useState('');
+  const [changePwdMsg, setChangePwdMsg] = useState('');
+
   // WhatsApp QR Web Linker State
   const [qrSession, setQrSession] = useState({
     status: 'DISCONNECTED',
@@ -197,6 +207,7 @@ export default function AdminPortal({ onClose }) {
       fetchOrders();
       fetchPackages();
       fetchSettings();
+      fetchAdminUsers();
       fetchQrStatus();
       fetchDispatchLogs();
     } else {
@@ -256,6 +267,60 @@ export default function AdminPortal({ onClose }) {
   const fetchSettings = async () => {
     const res = await api.getAdminSettings();
     if (res.success) setSettingsForm(res.data);
+  };
+
+  const fetchAdminUsers = async () => {
+    const res = await api.getAdminUsers();
+    if (res.success && res.data) setAdminUsers(res.data);
+  };
+
+  const handleCreateAdminUser = async (e) => {
+    e.preventDefault();
+    if (!newAdminUsername || !newAdminPassword) return;
+    setNewAdminLoading(true);
+    setAdminUserMsg('');
+    const res = await api.createAdminUser({
+      username: newAdminUsername.trim(),
+      password: newAdminPassword.trim(),
+      name: newAdminName.trim() || newAdminUsername.trim(),
+      role: 'ADMIN'
+    });
+    setNewAdminLoading(false);
+    if (res.success) {
+      setAdminUserMsg('✓ ' + (res.message || 'නව පරිපාලක සාර්ථකව එක් කරන ලදී!'));
+      setNewAdminUsername('');
+      setNewAdminPassword('');
+      setNewAdminName('');
+      fetchAdminUsers();
+    } else {
+      setAdminUserMsg('❌ ' + (res.message || 'පරිපාලක එක් කිරීම අසාර්ථක විය.'));
+    }
+  };
+
+  const handleDeleteAdminUser = async (id) => {
+    if (!window.confirm('මෙම පරිපාලක ගිණුම ඉවත් කිරීමට ඔබට විශ්වාසද?')) return;
+    const res = await api.deleteAdminUser(id);
+    if (res.success) {
+      fetchAdminUsers();
+    } else {
+      alert(res.message || 'දෝෂයක් සිදු විය.');
+    }
+  };
+
+  const handleChangeMyPassword = async (e) => {
+    e.preventDefault();
+    if (!changePwdVal) return;
+    setChangePwdMsg('');
+    const res = await api.changeAdminPassword({ 
+      username: adminUser?.username || 'admin', 
+      newPassword: changePwdVal.trim() 
+    });
+    if (res.success) {
+      setChangePwdMsg('✓ ' + (res.message || 'මුරපදය සාර්ථකව වෙනස් කරන ලදී!'));
+      setChangePwdVal('');
+    } else {
+      setChangePwdMsg('❌ ' + (res.message || 'දෝෂයක් සිදු විය.'));
+    }
   };
 
   // Status update with proof screenshot support
@@ -1075,7 +1140,8 @@ export default function AdminPortal({ onClose }) {
 
             {/* TAB 3: SETTINGS */}
             {activeTab === 'settings' && (
-              <form onSubmit={handleSaveSettings}>
+              <>
+                <form onSubmit={handleSaveSettings}>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>වෙබ් අඩවි සැකසුම් (Store Settings)</h3>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -1255,7 +1321,148 @@ export default function AdminPortal({ onClose }) {
                   <Save size={16} /> සැකසුම් සුරකින්න (Save Settings)
                 </button>
               </form>
-            )}
+
+              {/* ADMIN USER ACCOUNTS MANAGEMENT */}
+              <div style={{ marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid var(--border-light)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <ShieldCheck size={20} color="#ff7900" />
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
+                    අවසරලත් පරිපාලකයින් කළමනාකරණය (Authorized Admins Management)
+                  </h3>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                  {/* Card 1: Change Current Admin Password */}
+                  <div style={{ background: 'var(--bg-input)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border-hairline)' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: '#fed7aa', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Lock size={15} color="#ff7900" /> මගේ මුරපදය වෙනස් කරන්න (Change My Password)
+                    </h4>
+                    <form onSubmit={handleChangeMyPassword}>
+                      <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                        <label className="form-label" style={{ fontSize: '0.78rem' }}>නව මුරපදය (New Password)</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          placeholder="අවම අකුරු 6ක්..."
+                          value={changePwdVal}
+                          onChange={(e) => setChangePwdVal(e.target.value)}
+                          required
+                        />
+                      </div>
+                      {changePwdMsg && (
+                        <div style={{ fontSize: '0.82rem', marginBottom: '0.75rem', color: changePwdMsg.startsWith('✓') ? '#34d399' : '#f87171' }}>
+                          {changePwdMsg}
+                        </div>
+                      )}
+                      <button type="submit" className="btn btn-secondary btn-sm" style={{ width: '100%' }}>
+                        මුරපදය යාවත්කාලීන කරන්න
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Card 2: Add New Authorized Admin */}
+                  <div style={{ background: 'var(--bg-input)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border-hairline)' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Plus size={15} color="#38bdf8" /> නව පරිපාලකයෙකු එක් කරන්න (Add New Admin)
+                    </h4>
+                    <form onSubmit={handleCreateAdminUser}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.74rem' }}>Username</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="e.g. manager1"
+                            value={newAdminUsername}
+                            onChange={(e) => setNewAdminUsername(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.74rem' }}>Password</label>
+                          <input
+                            type="password"
+                            className="form-control"
+                            placeholder="••••••••"
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                        <label className="form-label" style={{ fontSize: '0.74rem' }}>Admin Name / Role Title</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. Reload Manager"
+                          value={newAdminName}
+                          onChange={(e) => setNewAdminName(e.target.value)}
+                        />
+                      </div>
+                      {adminUserMsg && (
+                        <div style={{ fontSize: '0.82rem', marginBottom: '0.75rem', color: adminUserMsg.startsWith('✓') ? '#34d399' : '#f87171' }}>
+                          {adminUserMsg}
+                        </div>
+                      )}
+                      <button 
+                        type="submit" 
+                        className="btn btn-primary btn-sm" 
+                        style={{ width: '100%' }}
+                        disabled={newAdminLoading}
+                      >
+                        {newAdminLoading ? 'එක් කරමින් පවතී...' : '+ නව පරිපාලක Save කරන්න'}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                {/* Card 3: List of Current Authorized Admins */}
+                <div style={{ background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-hairline)', overflow: 'hidden' }}>
+                  <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700 }}>දැනට සිටින අවසරලත් පරිපාලකයින් ({adminUsers.length || 1})</span>
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={fetchAdminUsers} style={{ padding: '0.25rem 0.6rem' }}>
+                      <RefreshCw size={13} /> Refresh
+                    </button>
+                  </div>
+                  <div style={{ padding: '0.5rem' }}>
+                    {(adminUsers.length > 0 ? adminUsers : [{ id: 'admin-1', username: 'admin', name: 'Main Administrator', role: 'SUPER_ADMIN' }]).map((adm) => (
+                      <div 
+                        key={adm.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.75rem 1rem',
+                          borderRadius: '8px',
+                          background: 'var(--bg-input)',
+                          marginBottom: '0.4rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <ShieldCheck size={16} color={adm.role === 'SUPER_ADMIN' ? '#ff7900' : '#38bdf8'} />
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: '0.88rem' }}>{adm.username} ({adm.name})</div>
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Role: {adm.role || 'ADMIN'}</span>
+                          </div>
+                        </div>
+                        {adm.id !== 'admin-1' && adm.username !== 'admin' && (
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171', padding: '0.35rem 0.6rem' }}
+                            onClick={() => handleDeleteAdminUser(adm.id)}
+                            title="Remove Admin"
+                          >
+                            <Trash2 size={14} /> Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>)}
 
             {/* ORDER STATUS MODAL */}
             {selectedOrder && (

@@ -127,5 +127,19 @@ export const api = {
     method: 'POST'
   }),
 
-  getWhatsAppDispatchLog: () => request('/admin/whatsapp/dispatch-log')
+  getWhatsAppDispatchLog: () => request('/admin/whatsapp/dispatch-log'),
+
+  // Admin User Management
+  getAdminUsers: () => request('/admin/users'),
+  createAdminUser: (userData) => request('/admin/users', {
+    method: 'POST',
+    body: JSON.stringify(userData)
+  }),
+  deleteAdminUser: (id) => request(`/admin/users/${id}`, {
+    method: 'DELETE'
+  }),
+  changeAdminPassword: (data) => request('/admin/users/change-password', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
 };
