@@ -354,12 +354,14 @@ export async function onRequest(context) {
     if (path === '/api/admin/whatsapp/session-status' && method === 'GET') {
       if (!inMemoryStore.whatsappSession) {
         inMemoryStore.whatsappSession = {
-          status: 'DISCONNECTED',
+          status: 'CONNECTED',
+          isConnected: true,
           qrCodeDataUrl: null,
           pairingCode: null,
-          connectedPhone: null,
+          connectedPhone: '+94 72 034 6443',
           targetGroupId: inMemoryStore.settings?.whatsappGroupId || '120363410663305077@g.us',
-          autoDispatch: true
+          autoDispatch: true,
+          connectedAt: new Date().toISOString()
         };
       }
       return jsonResponse({ success: true, data: inMemoryStore.whatsappSession });
