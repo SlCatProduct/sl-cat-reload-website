@@ -318,8 +318,9 @@ export async function onRequest(context) {
           totalOrders: orders.length,
           pendingOrders: orders.filter(o => o.status === 'REQUESTED' || o.status === 'READY_FOR_PAYMENT').length,
           completedOrders: completed.length,
-          totalRevenue,
-          totalSavingsDelivered: totalSaved
+          totalRevenue: totalRevenue || 0,
+          totalDiscountsGiven: totalSaved || 0,
+          totalSavingsDelivered: totalSaved || 0
         }
       });
     }

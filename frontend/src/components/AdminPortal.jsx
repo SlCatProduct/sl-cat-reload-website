@@ -630,20 +630,20 @@ export default function AdminPortal({ onClose }) {
                   <div className="metrics-grid">
                     <div className="metric-card">
                       <div className="metric-title">මුළු Orders (Total Orders)</div>
-                      <div className="metric-value">{stats.totalOrders}</div>
+                      <div className="metric-value">{stats.totalOrders || 0}</div>
                     </div>
                     <div className="metric-card orange">
                       <div className="metric-title">Pending Orders</div>
-                      <div className="metric-value">{stats.pendingOrders}</div>
+                      <div className="metric-value">{stats.pendingOrders || 0}</div>
                     </div>
                     <div className="metric-card green">
                       <div className="metric-title">සම්පූර්ණ කළ ආදායම (Revenue)</div>
-                      <div className="metric-value">Rs. {stats.totalRevenue.toLocaleString()}</div>
+                      <div className="metric-value">Rs. {(stats.totalRevenue || 0).toLocaleString()}</div>
                     </div>
                     <div className="metric-card">
                       <div className="metric-title">දුන් වට්ටම් (Discounts)</div>
                       <div className="metric-value" style={{ color: '#38bdf8' }}>
-                        Rs. {stats.totalDiscountsGiven.toLocaleString()}
+                        Rs. {(stats.totalDiscountsGiven || stats.totalSavingsDelivered || 0).toLocaleString()}
                       </div>
                     </div>
                   </div>
