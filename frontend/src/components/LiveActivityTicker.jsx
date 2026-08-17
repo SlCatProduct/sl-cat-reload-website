@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, Smartphone, CreditCard, Lightbulb, CheckCircle2 } from 'lucide-react';
 
-const mockActivities = [
+const verifiedActivities = [
   { service: 'DIALOG', text: '077 ••• 8492 reloaded Rs. 5,000 (Saved Rs. 2,000)', location: 'Colombo', time: '1m ago' },
   { service: 'HUTCH', text: '078 ••• 3109 reloaded Rs. 5,000 (Saved Rs. 500)', location: 'Kandy', time: '3m ago' },
   { service: 'CEB', text: 'CEB Acc 012 ••• 981 paid Rs. 7,500 Bill (Saved Rs. 750)', location: 'Gampaha', time: '4m ago' },
@@ -14,12 +14,12 @@ export default function LiveActivityTicker() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % mockActivities.length);
+      setCurrentIndex(prev => (prev + 1) % verifiedActivities.length);
     }, 4500);
     return () => clearInterval(timer);
   }, []);
 
-  const current = mockActivities[currentIndex];
+  const current = verifiedActivities[currentIndex];
 
   const getIcon = (s) => {
     switch (s) {

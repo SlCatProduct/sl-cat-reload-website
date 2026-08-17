@@ -2,7 +2,7 @@ import React from 'react';
 import { Zap, Search, Shield, PhoneCall, ArrowUpRight } from 'lucide-react';
 
 export default function Navbar({ onOpenTracker, onOpenAdmin, settings }) {
-  const whatsAppNumber = settings?.contactWhatsApp || '+94771234567';
+  const whatsAppNumber = settings?.contactWhatsApp || '+94720346443';
   const cleanWhatsApp = whatsAppNumber.replace(/[^0-9]/g, '');
 
   return (

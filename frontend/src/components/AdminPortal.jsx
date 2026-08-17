@@ -212,10 +212,11 @@ export default function AdminPortal({ onClose }) {
     const res = await api.adminLogin(username, password);
     setLoginLoading(false);
 
-    if (res.success && res.data?.token) {
-      localStorage.setItem('dialog_admin_token', res.data.token);
-      setToken(res.data.token);
-      setAdminUser(res.data.admin);
+    if (res.success && (res.data?.token || res.token)) {
+      const tokenVal = res.data?.token || res.token;
+      localStorage.setItem('dialog_admin_token', tokenVal);
+      setToken(tokenVal);
+      setAdminUser(res.data?.admin || res.user || { username: 'admin' });
     } else {
       setLoginError(res.message || 'Login failed. Please check credentials.');
     }
@@ -460,15 +461,19 @@ export default function AdminPortal({ onClose }) {
               )}
 
               <div style={{
-                background: 'rgba(255,121,0,0.1)',
+                background: 'rgba(255,121,0,0.06)',
                 padding: '0.65rem 0.85rem',
                 borderRadius: '8px',
                 fontSize: '0.78rem',
-                color: '#ffedd5',
-                marginBottom: '1.25rem'
+                color: '#fed7aa',
+                marginBottom: '1.25rem',
+                border: '1px solid rgba(255,121,0,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem'
               }}>
-                💡 <strong>Credentials:</strong>
-                <br />Username: <code>admin</code> | Password: <code>admin123</code>
+                <ShieldCheck size={15} color="#ff7900" style={{ flexShrink: 0 }} />
+                <span>අවසරලත් පරිපාලකයින් සඳහා පමණි (Authorized Admins Only)</span>
               </div>
 
               <button

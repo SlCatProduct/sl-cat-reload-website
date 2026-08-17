@@ -213,13 +213,25 @@ export async function onRequest(context) {
     if (path === '/api/admin/login' && method === 'POST') {
       const body = await request.json();
       if (body.username === 'admin' && body.password === 'admin123') {
+        const edgeToken = 'cf_edge_token_' + Date.now();
         return jsonResponse({
           success: true,
-          token: 'cf_edge_token_' + Date.now(),
-          user: { username: 'admin', role: 'admin' }
+          token: edgeToken,
+          data: {
+            token: edgeToken,
+            admin: { id: 'admin-1', username: 'admin', role: 'admin' }
+          }
         });
       }
-      return jsonResponse({ success: false, message: 'පරිශීලක නාමය හෝ මුරපදය වැරදියි' }, 401);
+      return jsonResponse({ success: false, message: 'පරිශීලක නාමය හෝ මුරපදය වැරදියි (Invalid username or password)' }, 401);
+    }
+
+    // 7.1 Admin Me
+    if (path === '/api/admin/me' && method === 'GET') {
+      return jsonResponse({
+        success: true,
+        data: { id: 'admin-1', username: 'admin', role: 'admin' }
+      });
     }
 
     // 8. Admin Orders & Stats
