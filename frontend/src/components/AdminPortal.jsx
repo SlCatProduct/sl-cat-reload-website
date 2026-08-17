@@ -26,7 +26,9 @@ import {
   QrCode,
   Check,
   ExternalLink,
-  Copy
+  Copy,
+  Zap,
+  Terminal
 } from 'lucide-react';
 import { api } from '../services/api';
 
