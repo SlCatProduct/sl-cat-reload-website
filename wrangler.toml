@@ -1,0 +1,14 @@
+name = "sl-cat-reload-website"
+main = "backend/cloudflare-worker.js"
+compatibility_date = "2024-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./frontend/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[vars]
+JWT_SECRET = "super_secret_jwt_key_change_in_production"
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin123"
