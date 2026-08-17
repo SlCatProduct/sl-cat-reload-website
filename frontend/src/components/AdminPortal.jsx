@@ -995,80 +995,129 @@ export default function AdminPortal({ onClose }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-                  {/* Card 1: 100% Cloud Automated Auto-Bridge */}
-                  <div style={{ background: 'var(--bg-input)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '16px', padding: '1.35rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                      <h4 style={{ fontSize: '1rem', margin: 0, color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
-                        <Zap size={18} /> 1. 100% Serverless Direct Cloud Bridge
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                  {/* Card 1: WhatsApp Web Live QR Scanner */}
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                      <h4 style={{ fontSize: '1.05rem', margin: 0, color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
+                        <QrCode size={20} /> WhatsApp Web QR Scanner
                       </h4>
-                      <span style={{ fontSize: '0.72rem', background: 'rgba(16,185,129,0.15)', color: '#34d399', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700 }}>
-                        ✓ ALWAYS ACTIVE
+                      <span style={{
+                        fontSize: '0.75rem',
+                        background: qrSession.status === 'CONNECTED' ? 'rgba(16,185,129,0.2)' : 'rgba(255,121,0,0.15)',
+                        color: qrSession.status === 'CONNECTED' ? '#34d399' : '#ff7900',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '6px',
+                        fontWeight: 800
+                      }}>
+                        {qrSession.status === 'CONNECTED' ? '🟢 CONNECTED' : '🟡 SCAN QR CODE'}
                       </span>
                     </div>
 
-                    <p style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '1rem' }}>
-                      පාරිභෝගිකයා (Customer) Checkout එකෙන් Order එක Submit කළ සැණින්, සම්පූර්ණ විස්තරය (Order Ref, Dialog No, මුදල, වට්ටම) WhatsApp හරහා 1-Click මගින් Auto-Send වේ.
-                    </p>
-
-                    <div style={{ background: 'rgba(16,185,129,0.06)', padding: '0.85rem', borderRadius: '10px', border: '1px solid rgba(16,185,129,0.2)', marginBottom: '1rem', fontSize: '0.82rem' }}>
-                      <div style={{ fontWeight: 800, color: '#34d399', marginBottom: '0.25rem' }}>
-                        🎯 Auto-Target Group ID:
-                      </div>
-                      <code style={{ fontSize: '0.88rem', color: '#fff', wordBreak: 'break-all' }}>
-                        120363410663305077@g.us
-                      </code>
-                      <div style={{ fontWeight: 800, color: '#ff7900', marginTop: '0.5rem', marginBottom: '0.25rem' }}>
-                        📱 Admin Contact WhatsApp:
-                      </div>
-                      <code style={{ fontSize: '0.88rem', color: '#fff' }}>
-                        +94 72 034 6443
-                      </code>
+                    {/* QR Code Container */}
+                    <div style={{
+                      background: '#ffffff',
+                      padding: '12px',
+                      borderRadius: '16px',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+                      marginBottom: '1rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '220px',
+                      minHeight: '220px',
+                      position: 'relative'
+                    }}>
+                      {qrSession.status === 'CONNECTED' ? (
+                        <div style={{ color: '#059669', padding: '1.5rem', textAlign: 'center' }}>
+                          <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto 0.75rem auto' }} />
+                          <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#065f46' }}>Connected!</div>
+                          <div style={{ fontSize: '0.8rem', color: '#047857', marginTop: '0.25rem' }}>{qrSession.connectedPhone || '+94720346443'}</div>
+                        </div>
+                      ) : qrSession.qrCodeDataUrl ? (
+                        <img
+                          src={qrSession.qrCodeDataUrl}
+                          alt="WhatsApp QR Code"
+                          style={{ width: '200px', height: '200px', display: 'block', borderRadius: '8px' }}
+                        />
+                      ) : (
+                        <div style={{ color: '#64748b', padding: '1.5rem', textAlign: 'center' }}>
+                          <QrCode size={56} color="#94a3b8" style={{ margin: '0 auto 0.75rem auto', opacity: 0.6 }} />
+                          <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>QR Code සූදානම් කරමින්...</div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Test Group Alert Button */}
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleTestWhatsAppGroupAlert}
-                      disabled={testGroupLoading}
-                      style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', width: '100%', padding: '0.7rem', fontWeight: 800 }}
-                    >
-                      <Send size={16} /> {testGroupLoading ? 'Group එකට යවමින්...' : '⚡ Test Alert එකක් යවන්න (Send Test to Group)'}
-                    </button>
-                    {testGroupResult && (
-                      <div style={{ fontSize: '0.82rem', marginTop: '0.6rem', color: testGroupResult.startsWith('✅') ? '#34d399' : '#f87171', textAlign: 'center' }}>
-                        {testGroupResult}
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', gap: '0.6rem', width: '100%', maxWidth: '320px' }}>
+                      {qrSession.status === 'CONNECTED' ? (
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={handleDisconnectSession}
+                          style={{ flex: 1, fontWeight: 700 }}
+                        >
+                          <LogOut size={14} /> Disconnect Session
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={handleGenerateQR}
+                          disabled={qrLoading}
+                          style={{ flex: 1, fontWeight: 700 }}
+                        >
+                          <RefreshCw size={14} className={qrLoading ? 'spin' : ''} /> {qrLoading ? 'Generating...' : '🔄 Refresh QR'}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Card 2: 24/7 Baileys Native Socket Engine Guide */}
-                  <div style={{ background: 'var(--bg-input)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '16px', padding: '1.35rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                      <h4 style={{ fontSize: '1rem', margin: 0, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
-                        <Terminal size={18} /> 2. 24/7 Baileys Native Socket Bot
+                  {/* Card 2: Mobile Instructions & Group Dispatch Details */}
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-highlight)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <h4 style={{ fontSize: '1.05rem', margin: '0 0 1rem 0', color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
+                        <Smartphone size={18} color="#ff7900" /> දුරකථනයෙන් සම්බන්ධ වන ආකාරය
                       </h4>
-                      <span style={{ fontSize: '0.72rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700 }}>
-                        🟢 LIVE RUNNING
-                      </span>
+
+                      <ol style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: '1.7', paddingLeft: '1.2rem', margin: '0 0 1.25rem 0' }}>
+                        <li>ඔබගේ දුරකථනයේ <strong>WhatsApp</strong> විවෘත කරන්න.</li>
+                        <li>උඩ ඇති <strong>Settings (හෝ ⋮ තිත් 3) ➔ Linked Devices</strong> වෙත යන්න.</li>
+                        <li><strong>"Link a Device" (උපාංගයක් සම්බන්ධ කරන්න)</strong> ඔබන්න.</li>
+                        <li>තිරයේ දිස්වන <strong>QR Code එක ඔබගේ දුරකථනයෙන් Scan කරන්න!</strong></li>
+                      </ol>
+
+                      <div style={{ background: 'rgba(16,185,129,0.06)', padding: '0.85rem', borderRadius: '10px', border: '1px solid rgba(16,185,129,0.2)', marginBottom: '1.25rem', fontSize: '0.82rem' }}>
+                        <div style={{ fontWeight: 800, color: '#34d399', marginBottom: '0.2rem' }}>
+                          🎯 Auto-Target Group ID:
+                        </div>
+                        <code style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-all' }}>
+                          120363410663305077@g.us
+                        </code>
+                        <div style={{ fontWeight: 800, color: '#ff7900', marginTop: '0.5rem', marginBottom: '0.2rem' }}>
+                          📱 Admin Contact Hotline:
+                        </div>
+                        <code style={{ fontSize: '0.85rem', color: '#fff' }}>
+                          +94 72 034 6443
+                        </code>
+                      </div>
                     </div>
 
-                    <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '0.85rem' }}>
-                      @whiskeysockets/baileys Socket Engine එක මගින් WhatsApp Group එකට සෘජුවම Auto-Orders යැවීමට:
-                    </p>
-
-                    <div style={{ background: '#090d16', padding: '0.75rem', borderRadius: '8px', border: '1px solid #1e293b', marginBottom: '0.85rem' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Terminal / Command Prompt:</div>
-                      <code style={{ fontSize: '0.9rem', color: '#38bdf8', fontFamily: 'monospace', fontWeight: 800 }}>
-                        npm run bot
-                      </code>
-                    </div>
-
-                    <div style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.7', background: 'rgba(56,189,248,0.06)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(56,189,248,0.15)' }}>
-                      <div>✅ <strong>Connected WhatsApp:</strong> +94 72 034 6443</div>
-                      <div>🎯 <strong>Target Group:</strong> 120363410663305077@g.us</div>
-                      <div style={{ color: '#34d399', marginTop: '0.25rem' }}>⚡ පාරිභෝගිකයින් දමන සෑම Order එකක්ම ස්වයංක්‍රීයව Group එකට යැවේ!</div>
+                    {/* Action: Send Test Alert to Group */}
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleTestWhatsAppGroupAlert}
+                        disabled={testGroupLoading}
+                        style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', width: '100%', padding: '0.75rem', fontWeight: 800 }}
+                      >
+                        <Send size={16} /> {testGroupLoading ? 'Group එකට යවමින්...' : '⚡ Test Alert එකක් යවන්න (Send Test to Group)'}
+                      </button>
+                      {testGroupResult && (
+                        <div style={{ fontSize: '0.82rem', marginTop: '0.5rem', color: testGroupResult.startsWith('✅') ? '#34d399' : '#f87171', textAlign: 'center' }}>
+                          {testGroupResult}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
