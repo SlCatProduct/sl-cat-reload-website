@@ -1,6 +1,10 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const QRCode = require('qrcode');
+let qrcodeTerminal = null;
+try {
+  qrcodeTerminal = require('qrcode-terminal');
+} catch (e) {}
 const path = require('path');
 const fs = require('fs');
 
@@ -75,7 +79,10 @@ async function startBaileys(forceRestart = false) {
         });
         connectionStatus = 'PAIRING';
         reconnectAttempts = 0;
-        console.log('[Baileys Engine] 📲 Genuine WhatsApp Multi-Device QR Code is READY for scanning!');
+        console.log('\n[Baileys Engine] 📲 Genuine WhatsApp Multi-Device QR Code is READY for scanning:');
+        if (qrcodeTerminal) {
+          qrcodeTerminal.generate(qr, { small: true });
+        }
       }
 
       if (connection === 'open') {
