@@ -26,8 +26,8 @@ export default function OrderSuccessModal({ order, onClose, onTrackOrder, settin
     window.print();
   };
 
-  const whatsAppNumber = settings?.contactWhatsApp || '+94771234567';
-  const cleanWhatsApp = whatsAppNumber.replace(/[^0-9]/g, '');
+  const whatsAppNumber = settings?.contactWhatsApp || '+94720346443';
+  const cleanWhatsApp = whatsAppNumber.replace(/[^0-9]/g, '') || '94720346443';
 
   const serviceName = order.serviceType === 'CEB' 
     ? 'CEB Electricity Bill' 
