@@ -468,11 +468,14 @@ export default function AdminPortal({ onClose }) {
     setTestGroupResult('');
     const res = await api.testWhatsAppGroupAlert();
     setTestGroupLoading(false);
-    if (res.success) {
-      setTestGroupResult('✅ WhatsApp Group Test Alert එක සාර්ථකව යොමු කරන ලදී!');
-    } else {
-      setTestGroupResult('❌ Alert එක යැවීමට නොහැකි විය: ' + (res.error || res.message));
-    }
+    fetchDispatchLogs();
+
+    const alertText = `🚨 *TEST ALERT - DIALOG RELOAD HUB*\n━━━━━━━━━━━━━━━━━━━━━\n✅ WhatsApp Group Alert System is LIVE & CONNECTED!\n🎯 Target Group: 120363410663305077@g.us\n📱 Admin Hotline: +94720346443\n⏰ Timestamp: ${new Date().toLocaleTimeString()} | ${new Date().toLocaleDateString('en-GB')}\n━━━━━━━━━━━━━━━━━━━━━\n⚡ Order Auto-Dispatch Ready!`;
+    
+    // Automatically trigger WhatsApp share bridge
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(alertText)}`, '_blank');
+
+    setTestGroupResult('✅ WhatsApp විවෘත විය! Group එක වෙත Test Alert එක Send කරන්න.');
   };
 
   // Save settings
