@@ -1,0 +1,15 @@
+{
+  "name": "dialog-reload-fullstack",
+  "version": "1.0.0",
+  "description": "Dialog Reload Full-stack Application with 15% and 40% automated discounts",
+  "main": "backend/server.js",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "node backend/server.js",
+    "dev:backend": "cd backend && npm start",
+    "dev:frontend": "cd frontend && npm run dev",
+    "test:calc": "node backend/test-calc.js"
+  },
+  "dependencies": {}
+}
